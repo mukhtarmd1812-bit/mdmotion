@@ -1,0 +1,416 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>MD Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: editor's timeline — a playhead hero, then a bin of 9:16 clips filtered by track */
+:root {
+  --bg: #0b0b0e;
+  --panel: #141419;
+  --line: #26262e;
+  --fg: #f2f1f4;
+  --muted: #9a98a6;
+  --dim: #63616d;
+  --red: #ff2d46;
+  --red-soft: rgba(255, 45, 70, .14);
+  --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- top bar */
+.top { padding-block: 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.badge {
+  width: 42px; height: 42px; border-radius: 11px; border: 2.5px solid var(--red); background: #0e0e12;
+  display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-style: italic;
+  font-size: 18px; letter-spacing: -.02em;
+}
+.brand b { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -.01em; }
+.brand small { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .04em; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 15px;
+  padding: 12px 20px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+  transition: border-color .2s, transform .2s;
+}
+.btn:hover { border-color: var(--red); }
+.btn:focus-visible, .chip:focus-visible, .card:focus-visible, .close:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.primary:hover { transform: translateY(-1px); }
+
+/* ---------- hero */
+.hero { display: grid; grid-template-columns: 1.25fr .75fr; gap: 48px; align-items: center; padding-block: 36px 64px; }
+.hero > * { min-width: 0; }
+.rec { font-family: var(--mono); font-size: 12.5px; color: var(--muted); letter-spacing: .08em; display: flex; align-items: center; gap: 10px; }
+.rec i { width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px var(--red-soft); animation: blink 1.4s steps(2, start) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+h1 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(46px, 7.4vw, 96px); line-height: .94;
+  letter-spacing: -.035em; margin: 18px 0 22px; text-wrap: balance;
+}
+h1 em { font-style: italic; color: var(--red); }
+.lede { color: var(--muted); font-size: 18px; max-width: 34em; margin: 0 0 30px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.specs { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 36px; font-family: var(--mono); font-size: 13px; color: var(--dim); }
+.specs span b { color: var(--fg); font-weight: 500; }
+
+.phone {
+  position: relative; width: min(100%, 330px); margin-left: auto; aspect-ratio: 9 / 16; max-width: 100%;
+  border-radius: 34px; padding: 8px; background: linear-gradient(160deg, #2a2a33, #111116);
+  box-shadow: 0 40px 80px -30px rgba(255, 45, 70, .35), 0 0 0 1px var(--line);
+}
+.phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 27px; display: block; background: #000; }
+.phone .tc {
+  position: absolute; left: 22px; bottom: 22px; font-family: var(--mono); font-size: 12px; color: #fff;
+  background: rgba(0, 0, 0, .55); padding: 5px 9px; border-radius: 6px; backdrop-filter: blur(6px);
+}
+
+/* ---------- timeline ruler divider */
+.ruler {
+  height: 28px; border-top: 1px solid var(--line);
+  background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px) top / 100% 7px no-repeat,
+              repeating-linear-gradient(90deg, #3a3a44 0 1px, transparent 1px 60px) top / 100% 13px no-repeat;
+}
+
+/* ---------- work */
+.work-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px; padding-block: 28px 22px; }
+h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4.4vw, 52px); letter-spacing: -.03em; line-height: 1; margin: 0; }
+h2 span { font-family: var(--mono); font-size: 14px; font-weight: 400; color: var(--muted); letter-spacing: 0; margin-left: 10px; vertical-align: middle; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: 600 14px var(--body); color: var(--muted); background: transparent; border: 1px solid var(--line);
+  padding: 9px 15px; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center;
+}
+.chip i { font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--dim); }
+.chip:hover { color: var(--fg); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip[aria-pressed="true"] i { color: var(--bg); opacity: .6; }
+
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding-bottom: 72px; }
+.card {
+  position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit;
+  text-align: left; cursor: pointer; font: inherit;
+}
+.frame {
+  position: relative; aspect-ratio: 9 / 16; max-width: 100%; border-radius: 16px; overflow: hidden;
+  background: var(--panel); box-shadow: 0 0 0 1px var(--line);
+  transition: box-shadow .25s, transform .25s;
+}
+.frame img, .frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.frame video { opacity: 0; transition: opacity .25s; }
+.card.playing .frame video { opacity: 1; }
+.card:hover .frame { box-shadow: 0 0 0 2px var(--red); transform: translateY(-3px); }
+.dur {
+  position: absolute; right: 10px; bottom: 10px; font-family: var(--mono); font-size: 11.5px; color: #fff;
+  background: rgba(0, 0, 0, .6); padding: 3px 7px; border-radius: 5px; font-variant-numeric: tabular-nums;
+}
+.play {
+  position: absolute; left: 10px; bottom: 10px; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--red); display: grid; place-items: center; opacity: 0; transform: scale(.8); transition: .2s;
+}
+.play::after { content: ""; border-left: 11px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; margin-left: 3px; }
+.card:hover .play, .card:focus-visible .play { opacity: 1; transform: none; }
+.meta { padding: 12px 2px 0; }
+.meta b { display: block; font-weight: 700; font-size: 15.5px; line-height: 1.3; }
+.meta small { font-family: var(--mono); font-size: 11.5px; color: var(--dim); letter-spacing: .02em; }
+
+/* ---------- services + contact */
+.services { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding-block: 8px 72px; }
+.svc { border-top: 2px solid var(--line); padding-top: 18px; }
+.svc:first-child { border-color: var(--red); }
+.svc h3 { font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: -.01em; margin: 0 0 8px; }
+.svc p { color: var(--muted); margin: 0; font-size: 15px; }
+.contact {
+  border-radius: 28px; background: var(--panel); box-shadow: 0 0 0 1px var(--line);
+  padding: clamp(28px, 5vw, 56px); display: flex; flex-wrap: wrap; gap: 28px; align-items: center; justify-content: space-between;
+  background-image: radial-gradient(600px 300px at 100% 0%, var(--red-soft), transparent 70%);
+}
+.contact h2 { max-width: 13em; text-wrap: balance; }
+.contact p { color: var(--muted); margin: 12px 0 0; }
+.handle { font-family: var(--mono); font-size: 15px; color: var(--fg); }
+footer { padding-block: 40px 56px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; color: var(--dim); font-size: 13px; font-family: var(--mono); }
+
+/* ---------- lightbox */
+.lb {
+  position: fixed; inset: 0; z-index: 50; background: rgba(5, 5, 8, .92); backdrop-filter: blur(10px);
+  display: grid; place-items: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.lb-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; max-height: 100%; }
+.lb video { height: min(78vh, 900px); max-width: 100%; aspect-ratio: 9 / 16; border-radius: 18px; background: #000; display: block; }
+.lb-cap { text-align: center; }
+.lb-cap b { font-family: var(--display); font-size: 20px; }
+.lb-cap small { display: block; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.close {
+  position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px));
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+  font-size: 22px; cursor: pointer; line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 12px 48px; }
+  .phone { margin: 0 auto; width: min(78%, 300px); }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .services { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .top .btn span { display: none; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .services { grid-template-columns: 1fr; }
+  .meta b { font-size: 14px; }
+  .lede { font-size: 16.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<header class="wrap top">
+  <a class="brand" href="#work" aria-label="MD Motion, go to work">
+    <span class="badge" aria-hidden="true">MD</span>
+    <span><b>MD Motion</b><small>mdmotion.in</small></span>
+  </a>
+  <a class="btn primary" href="https://instagram.com/mdmotion.in" target="_blank" rel="noopener">DM <span>on Instagram</span> ↗</a>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div>
+      <div class="rec"><i></i>REC · VIDEO EDITOR · INDIA</div>
+      <h1>Raw clips in.<br><em>Scroll-stoppers</em> out.</h1>
+      <p class="lede">I'm Mukhtar. I edit podcast clips, talking-head reels, brand promos and ads with motion captions, grading and After Effects motion graphics, built to hold attention past the first second.</p>
+      <div class="cta-row">
+        <a class="btn primary" href="#work">Watch the work</a>
+        <a class="btn" href="https://instagram.com/mdmotion.in" target="_blank" rel="noopener">@mdmotion.in ↗</a>
+      </div>
+      <div class="specs" aria-label="Delivery specs">
+        <span><b id="count">48</b> reels below</span>
+        <span><b>1080×1920</b> · 9:16</span>
+        <span><b>-14 LUFS</b> mixed</span>
+        <span><b>AE</b> · Premiere · Claude AI</span>
+      </div>
+    </div>
+    <div class="phone">
+      <video data-id="gold" poster="media/gold.jpg" autoplay muted loop playsinline preload="auto" aria-label="Showreel preview: Gold Hero edit"></video>
+      <span class="tc" id="tc">00:00:00:00</span>
+    </div>
+  </section>
+
+  <div class="ruler" aria-hidden="true"></div>
+
+  <section class="wrap" id="work">
+    <div class="work-head">
+      <h2>The work<span id="shown">48 clips</span></h2>
+      <div class="chips" role="group" aria-label="Filter by type" id="chips"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="wrap services" aria-label="Services">
+    <div class="svc"><h3>Podcast &amp; talking head</h3><p>Hook-first cuts, word-timed captions, B-roll, zooms and a clean -14 LUFS mix.</p></div>
+    <div class="svc"><h3>Motion graphics</h3><p>After Effects titles, 3D glass and kinetic type, speed ramps, logo reveals.</p></div>
+    <div class="svc"><h3>Brands &amp; businesses</h3><p>Restaurant, real estate and product reels with grading and festive campaigns.</p></div>
+    <div class="svc"><h3>Ads</h3><p>Before/after ad creatives built for Meta and Instagram, 15–20 seconds.</p></div>
+  </section>
+
+  <section class="wrap">
+    <div class="contact">
+      <div>
+        <h2>Got raw footage? Let's make it move.</h2>
+        <p>Send a DM with your clip and deadline. Reply within a day.</p>
+      </div>
+      <div class="cta-row">
+        <a class="btn primary" href="https://instagram.com/mdmotion.in" target="_blank" rel="noopener">DM @mdmotion.in ↗</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>© MD Motion · mdmotion.in</span>
+  <span>Edited by Mukhtar</span>
+</footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lb-title">
+  <button class="close" id="lb-close" aria-label="Close video">×</button>
+  <div class="lb-inner">
+    <video id="lb-video" controls playsinline></video>
+    <div class="lb-cap"><b id="lb-title"></b><small id="lb-sub"></small></div>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  podcast: 'Podcast & talking head',
+  ba: 'Before / After',
+  motion: 'Motion graphics',
+  brand: 'Brands & businesses'
+};
+const WORK = [
+  ['viral', 'Anton Viral Cut', 'podcast', 13.0, 'Long talk cut to a 13 s hook'],
+  ['money', 'Green Money Counter', 'podcast', 10.0, 'AI presenter · flying notes & live counters'],
+  ['hiring', 'MD Motion · We\'re Hiring', 'motion', 11.8, 'Yellow glitch titles · hologram intro'],
+  ['opus', 'Raw → Reel in Seconds', 'ba', 8.0, 'Raw vs edit · comment-to-DM promo'],
+  ['rapido', 'Ride App · Laptop Promo', 'motion', 28.8, 'Screen UI motion · unofficial Rapido concept'],
+  ['teal2', 'Gurgaon Homes Ad', 'brand', 46.3, 'Real estate ad · map route & teal italic type'],
+  ['warm', 'Warm Podcast', 'podcast', 46.0, 'Wedding photographer · warm grade & B-roll'],
+  ['vicky', 'Vicky Mobile', 'brand', 40.8, 'Phone store promo · gifting skit'],
+  ['story', 'Momentum', 'motion', 28.1, 'Voiceover story · paper-card motion'],
+  ['teal', 'Teal Italic Ad', 'podcast', 28.9, 'Architect talking head · 3D icons'],
+  ['chrome', 'Tall Poppy Syndrome', 'podcast', 49.8, 'Podcast · chrome words & dark glass scenes'],
+  ['podref', 'Control · Before / After', 'ba', 38.0, 'Raw vs edit · podcast ad card'],
+  ['gurugram', 'Gurugram Sector 14', 'brand', 73.6, 'Real estate · every style in one reel'],
+  ['redpill', 'Red Pill Captions', 'podcast', 20.5, 'Product talk · red pill captions & icons'],
+  ['luxe', 'Luxe Behind-Head', 'podcast', 31.4, 'Realtor · cream & gold words behind the head'],
+  ['realestate', 'Crow River Listing', 'brand', 34.8, 'Land listing · map pins & big numbers'],
+  ['ba-gold', 'Gold Hero · Before / After', 'ba', 36.6, 'Raw vs edit, same frames'],
+  ['gold', 'Gold Hero', 'podcast', 35.6, 'Real estate · gold captions'],
+  ['ravix', 'Behind-Head Words', 'podcast', 36.4, 'Text tucked behind the speaker'],
+  ['orange', 'Orange Editorial', 'podcast', 27.5, 'Serif + script captions'],
+  ['blue', 'Clean Blue UI', 'podcast', 49.9, 'Podcast · UI overlays'],
+  ['limeglass', 'Lime Glass', 'podcast', 24.2, 'Hinglish fitness podcast'],
+  ['limeneon', 'Lime Neon', 'podcast', 29.5, 'Realtor walk-and-talk'],
+  ['redsig', 'Red Signature', 'podcast', 50.2, 'Curved kinetic captions'],
+  ['darkred', 'Dark Red', 'podcast', 54.1, 'Podcast · dark grade'],
+  ['cleancut', 'The Comfort Trap', 'podcast', 23.0, 'Mixed-type captions'],
+  ['ba-redsig', 'Red Signature · Before / After', 'ba', 51.2, 'Raw vs edit · curved kinetic captions'],
+  ['ba-blue', 'Clean Blue · Before / After', 'ba', 50.9, 'Raw vs edit · podcast UI overlays'],
+  ['ba-darkred', 'Dark Red · Before / After', 'ba', 55.1, 'Raw vs edit · dark grade'],
+  ['ba-limeneon', 'Lime Neon · Before / After', 'ba', 30.4, 'Raw vs edit · realtor walk-and-talk'],
+  ['ad-gold', 'Real Estate Ad', 'ba', 16.0, 'Raw se premium · Gold Portal'],
+  ['ad-cafe', 'Cafe Ad', 'ba', 16.0, 'Before / after · Teal Cafe'],
+  ['ad-crimson', 'Creators Ad', 'ba', 16.0, 'Before / after · Crimson Orbit'],
+  ['brand', 'Every Brand Starts', 'motion', 50.0, 'Agency promo · kinetic type'],
+  ['decoy', 'Decoy Effect', 'motion', 45.0, 'Explainer · glass 3D'],
+  ['cooking', 'Editing Is Like Cooking', 'motion', 15.3, '3D fly-through'],
+  ['propfirm', 'Prop Firm', 'motion', 24.8, 'Fintech UI motion'],
+  ['startnow', 'Start Now', 'motion', 11.0, 'Neon type reveal'],
+  ['kiku', 'Kiku', 'motion', 15.0, '3D character reel'],
+  ['applemotion', 'Mask Slide-Up Reveal', 'motion', 20.4, 'Smooth text motion study'],
+  ['vh-sizzler', 'Veerji Haveli · Hey Siri', 'brand', 44.8, 'Restaurant · sizzler skit'],
+  ['vh-diwali', 'Veerji Haveli · Diwali Gifting', 'brand', 42.0, 'Festive campaign'],
+  ['vh-food', 'Veerji Haveli · Bhook Lagi?', 'brand', 22.6, 'Food B-roll edit'],
+  ['prop3d', 'Builder Floor · 3D', 'brand', 27.7, 'Real estate · 3D titles'],
+  ['propglass', 'Builder Floor · Glass', 'brand', 27.7, 'Real estate · glass 3D'],
+  ['aroma-beat', 'Aroma · Beat Sync', 'brand', 14.4, 'Lounge promo · cut to the beat'],
+  ['aroma-cine', 'Aroma · Cinematic', 'brand', 14.4, 'Lounge promo · film look'],
+  ['aroma-focus', 'Aroma · Focus Pull', 'brand', 14.4, 'Lounge promo · rack focus']
+];
+// Load each clip as a blob so it plays even where the host can't serve byte ranges (iOS / in-app viewers)
+const blobs = {};
+function clipURL(id) {
+  if (!blobs[id]) blobs[id] = fetch(`media/${id}.mp4`).then(r => { if (!r.ok) throw r.status; return r.blob(); })
+    .then(b => URL.createObjectURL(b.type === 'video/mp4' ? b : new Blob([b], { type: 'video/mp4' })))
+    .catch(() => `media/${id}.mp4`);
+  return blobs[id];
+}
+const tc = s => { const m = Math.floor(s / 60), x = Math.round(s % 60); return `${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}`; };
+
+const grid = document.getElementById('grid');
+const chips = document.getElementById('chips');
+const shown = document.getElementById('shown');
+document.getElementById('count').textContent = WORK.length;
+shown.textContent = `${WORK.length} clips`;
+
+WORK.forEach(([id, title, cat, dur, note]) => {
+  const b = document.createElement('button');
+  b.className = 'card'; b.dataset.cat = cat; b.dataset.id = id;
+  b.setAttribute('aria-label', `Play ${title}`);
+  b.innerHTML = `<div class="frame"><img src="media/${id}.jpg" alt="" loading="lazy"><span class="play"></span><span class="dur">${tc(dur)}</span></div>
+    <div class="meta"><b>${title}</b><small>${CATS[cat]} · ${note}</small></div>`;
+  b.addEventListener('click', () => openLB(id, title, `${CATS[cat]} · ${note}`));
+  // hover preview on devices with a mouse
+  b.addEventListener('mouseenter', () => {
+    if (!matchMedia('(hover: hover)').matches) return;
+    let v = b.querySelector('video');
+    if (!v) {
+      v = document.createElement('video');
+      Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto' });
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+      b.querySelector('.frame').insertBefore(v, b.querySelector('.play'));
+    }
+    b.dataset.hover = '1';
+    clipURL(id).then(u => {
+      if (b.dataset.hover !== '1') return;
+      if (v.src !== u) v.src = u;
+      v.currentTime = 0; v.play().then(() => b.classList.add('playing')).catch(() => {});
+    });
+  });
+  b.addEventListener('mouseleave', () => {
+    b.dataset.hover = ''; const v = b.querySelector('video'); b.classList.remove('playing'); if (v) v.pause();
+  });
+  grid.appendChild(b);
+});
+
+const filters = [['all', 'All'], ...Object.entries(CATS)];
+filters.forEach(([key, label]) => {
+  const n = key === 'all' ? WORK.length : WORK.filter(w => w[2] === key).length;
+  const c = document.createElement('button');
+  c.className = 'chip'; c.setAttribute('aria-pressed', key === 'all'); c.id = 'f-' + key;
+  c.innerHTML = `${label}<i>${n}</i>`;
+  c.addEventListener('click', () => setFilter(key));
+  chips.appendChild(c);
+});
+function setFilter(key) {
+  let n = 0;
+  grid.querySelectorAll('.card').forEach(c => { const on = key === 'all' || c.dataset.cat === key; c.hidden = !on; if (on) n++; });
+  chips.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c.id === 'f-' + key));
+  shown.textContent = `${n} clips`;
+  try { localStorage.setItem('mdm-filter', key); } catch (e) {}
+}
+try { const k = localStorage.getItem('mdm-filter'); if (k && (k === 'all' || CATS[k])) setFilter(k); } catch (e) {}
+
+// lightbox
+const lb = document.getElementById('lb'), lv = document.getElementById('lb-video');
+let lastFocus = null, lbId = null;
+function openLB(id, title, sub) {
+  lastFocus = document.activeElement; lbId = id;
+  lv.removeAttribute('src'); lv.poster = `media/${id}.jpg`;
+  document.getElementById('lb-title').textContent = title;
+  document.getElementById('lb-sub').textContent = sub;
+  lb.hidden = false; document.body.style.overflow = 'hidden';
+  document.getElementById('lb-close').focus();
+  clipURL(id).then(u => {
+    if (lbId !== id || lb.hidden) return;
+    lv.src = u; lv.muted = false;
+    // browsers may block sound without a direct tap: fall back to muted, the controls can unmute
+    lv.play().catch(() => { lv.muted = true; lv.play().catch(() => {}); });
+  });
+}
+function closeLB() {
+  lbId = null; lv.pause(); lv.removeAttribute('src'); lv.load();
+  lb.hidden = true; document.body.style.overflow = '';
+  if (lastFocus) lastFocus.focus();
+}
+document.getElementById('lb-close').addEventListener('click', closeLB);
+lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !lb.hidden) closeLB(); });
+
+// hero timecode (HH:MM:SS:FF at 24 fps) follows the showreel
+const hv = document.querySelector('.phone video');
+clipURL('gold').then(u => { hv.src = u; hv.muted = true; hv.play().catch(() => {}); });
+const tcEl = document.getElementById('tc');
+const pad = n => String(n).padStart(2, '0');
+(function tick() {
+  const t = hv.currentTime || 0;
+  tcEl.textContent = `00:${pad(Math.floor(t / 60))}:${pad(Math.floor(t % 60))}:${pad(Math.floor((t % 1) * 24))}`;
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body></html>

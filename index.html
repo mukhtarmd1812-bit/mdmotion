@@ -24,7 +24,7 @@
 [hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased; overflow-x: clip;
 }
 a { color: inherit; }
 .wrap {
@@ -54,13 +54,13 @@ a { color: inherit; }
 .btn.primary:hover { transform: translateY(-1px); }
 
 /* ---------- hero */
-.hero { display: grid; grid-template-columns: 1.25fr .75fr; gap: 48px; align-items: center; padding-block: 36px 64px; }
+.hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: center; padding-block: 28px 64px; }
 .hero > * { min-width: 0; }
 .rec { font-family: var(--mono); font-size: 12.5px; color: var(--muted); letter-spacing: .08em; display: flex; align-items: center; gap: 10px; }
 .rec i { width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px var(--red-soft); animation: blink 1.4s steps(2, start) infinite; }
 @keyframes blink { 50% { opacity: .25; } }
 h1 {
-  font-family: var(--display); font-weight: 800; font-size: clamp(46px, 7.4vw, 96px); line-height: .94;
+  font-family: var(--display); font-weight: 800; font-size: clamp(42px, 5.9vw, 78px); line-height: .94;
   letter-spacing: -.035em; margin: 18px 0 22px; text-wrap: balance;
 }
 h1 em { font-style: italic; color: var(--red); }
@@ -69,16 +69,43 @@ h1 em { font-style: italic; color: var(--red); }
 .specs { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 36px; font-family: var(--mono); font-size: 13px; color: var(--dim); }
 .specs span b { color: var(--fg); font-weight: 500; }
 
-.phone {
-  position: relative; width: min(100%, 330px); margin-left: auto; aspect-ratio: 9 / 16; max-width: 100%;
-  border-radius: 34px; padding: 8px; background: linear-gradient(160deg, #2a2a33, #111116);
-  box-shadow: 0 40px 80px -30px rgba(255, 45, 70, .35), 0 0 0 1px var(--line);
+/* ---------- hero reel stage: five phones fanned out, centre one in front */
+.stage { position: relative; width: 100%; max-width: 580px; margin-left: auto; aspect-ratio: 1.12 / 1; }
+.ph {
+  --x: 0%; --s: 1; --r: 0deg; --z: 5;
+  position: absolute; top: 50%; left: 50%; width: 44%; aspect-ratio: 9 / 16; padding: 6px; border: 0; cursor: pointer;
+  border-radius: 28px; background: linear-gradient(160deg, #2a2a33, #111116); z-index: var(--z);
+  transform: translate(-50%, -50%) translateX(var(--x)) rotate(var(--r)) scale(var(--s));
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, .9), 0 0 0 1px var(--line);
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1), filter .35s, box-shadow .35s;
 }
-.phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 27px; display: block; background: #000; }
-.phone .tc {
-  position: absolute; left: 22px; bottom: 22px; font-family: var(--mono); font-size: 12px; color: #fff;
-  background: rgba(0, 0, 0, .55); padding: 5px 9px; border-radius: 6px; backdrop-filter: blur(6px);
+.ph video { width: 100%; height: 100%; object-fit: cover; border-radius: 22px; display: block; background: #000; }
+.ph.p0 { box-shadow: 0 40px 80px -30px rgba(255, 45, 70, .45), 0 0 0 1px var(--line); }
+.ph.l1 { --x: -56%; --s: .8; --r: -6deg; --z: 4; filter: brightness(.72); }
+.ph.r1 { --x: 56%; --s: .8; --r: 6deg; --z: 4; filter: brightness(.72); }
+.ph.l2 { --x: -92%; --s: .64; --r: -11deg; --z: 3; filter: brightness(.5); }
+.ph.r2 { --x: 92%; --s: .64; --r: 11deg; --z: 3; filter: brightness(.5); }
+@media (max-width: 1240px) { .ph.l2 { --x: -78%; } .ph.r2 { --x: 78%; } }
+.ph:hover { filter: none; z-index: 6; box-shadow: 0 0 0 2px var(--red), 0 30px 60px -28px rgba(0, 0, 0, .9); }
+.ph:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.ph .tc {
+  position: absolute; left: 16px; bottom: 16px; font-family: var(--mono); font-size: 11.5px; color: #fff;
+  background: rgba(0, 0, 0, .55); padding: 4px 8px; border-radius: 6px; backdrop-filter: blur(6px); pointer-events: none;
 }
+.ph .lbl {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%); white-space: nowrap; pointer-events: none;
+  font: 600 11px var(--mono); color: #fff; background: rgba(0, 0, 0, .5); padding: 3px 8px; border-radius: 999px;
+  opacity: 0; transition: opacity .25s;
+}
+.ph:hover .lbl, .ph.p0 .lbl { opacity: 1; }
+
+/* ---------- contact bar */
+.contactbar { border-bottom: 1px solid var(--line); background: #0e0e12; font-family: var(--mono); font-size: 13px; }
+.contactbar .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px 22px; padding-block: 9px; }
+.contactbar span { color: var(--dim); margin-right: auto; }
+.contactbar a { color: var(--fg); text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.contactbar a:hover { color: var(--red); }
+.contactbar a i { font-style: normal; color: var(--red); }
 
 /* ---------- timeline ruler divider */
 .ruler {
@@ -164,12 +191,18 @@ footer { padding-block: 40px 56px; display: flex; flex-wrap: wrap; gap: 12px; ju
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 12px 48px; }
-  .phone { margin: 0 auto; width: min(78%, 300px); }
+  .stage { margin: 0 auto; max-width: 520px; }
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .services { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
   .top .btn span { display: none; }
+  .stage { aspect-ratio: .95 / 1; }
+  .ph { width: 52%; }
+  .ph.l1 { --x: -50%; } .ph.r1 { --x: 50%; }
+  .ph.l2, .ph.r2 { display: none; }
+  .contactbar .wrap { justify-content: center; }
+  .contactbar span { display: none; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .services { grid-template-columns: 1fr; }
   .meta b { font-size: 14px; }
@@ -179,6 +212,15 @@ footer { padding-block: 40px 56px; display: flex; flex-wrap: wrap; gap: 12px; ju
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 </style>
+
+<div class="contactbar" aria-label="Contact">
+  <div class="wrap">
+    <span>Available for edits & bookings</span>
+    <a href="https://wa.me/916204550880" target="_blank" rel="noopener"><i>●</i>WhatsApp</a>
+    <a href="tel:+916204550880"><i>☎</i>+91 62045 50880</a>
+    <a href="mailto:mukhtarmd1812@gmail.com"><i>✉</i>mukhtarmd1812@gmail.com</a>
+  </div>
+</div>
 
 <header class="wrap top">
   <a class="brand" href="#work" aria-label="MD Motion, go to work">
@@ -192,10 +234,11 @@ footer { padding-block: 40px 56px; display: flex; flex-wrap: wrap; gap: 12px; ju
   <section class="wrap hero">
     <div>
       <div class="rec"><i></i>REC · VIDEO EDITOR · INDIA</div>
-      <h1>Raw clips in.<br><em>Scroll-stoppers</em> out.</h1>
+      <h1>Raw clips in.<br><em>Scroll‑stoppers</em> out.</h1>
       <p class="lede">I'm Mukhtar. I edit podcast clips, talking-head reels, brand promos and ads with motion captions, grading and After Effects motion graphics, built to hold attention past the first second.</p>
       <div class="cta-row">
         <a class="btn primary" href="#work">Watch the work</a>
+        <a class="btn" href="https://wa.me/916204550880" target="_blank" rel="noopener">WhatsApp ↗</a>
         <a class="btn" href="https://instagram.com/mdmotion.in" target="_blank" rel="noopener">@mdmotion.in ↗</a>
       </div>
       <div class="specs" aria-label="Delivery specs">
@@ -205,10 +248,7 @@ footer { padding-block: 40px 56px; display: flex; flex-wrap: wrap; gap: 12px; ju
         <span><b>AE</b> · Premiere · Claude AI</span>
       </div>
     </div>
-    <div class="phone">
-      <video data-id="gold" poster="media/gold.jpg" autoplay muted loop playsinline preload="auto" aria-label="Showreel preview: Gold Hero edit"></video>
-      <span class="tc" id="tc">00:00:00:00</span>
-    </div>
+    <div class="stage" id="stage" aria-label="Showreel: five reels, tap one to watch it with sound"></div>
   </section>
 
   <div class="ruler" aria-hidden="true"></div>
@@ -404,14 +444,31 @@ document.getElementById('lb-close').addEventListener('click', closeLB);
 lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !lb.hidden) closeLB(); });
 
-// hero timecode (HH:MM:SS:FF at 24 fps) follows the showreel
-const hv = document.querySelector('.phone video');
-clipURL('gold').then(u => { hv.src = u; hv.muted = true; hv.play().catch(() => {}); });
-const tcEl = document.getElementById('tc');
+// hero stage: five reels fanned out; centre one carries the timecode. Tap any to open it with sound.
+const HERO = [['l2', 'hiring'], ['l1', 'viral'], ['p0', 'gold'], ['r1', 'money'], ['r2', 'redpill']];
+const stage = document.getElementById('stage');
+const byId = Object.fromEntries(WORK.map(w => [w[0], w]));
 const pad = n => String(n).padStart(2, '0');
+let hv = null;
+HERO.forEach(([pos, id]) => {
+  const w = byId[id]; if (!w) return;
+  const b = document.createElement('button');
+  b.className = 'ph ' + pos; b.setAttribute('aria-label', `Play ${w[1]}`);
+  b.innerHTML = `<video poster="media/${id}.jpg" muted loop playsinline preload="none"></video><span class="lbl">${w[1]}</span>` +
+    (pos === 'p0' ? '<span class="tc" id="tc">00:00:00:00</span>' : '');
+  b.addEventListener('click', () => openLB(id, w[1], `${CATS[w[2]]} · ${w[4]}`));
+  stage.appendChild(b);
+  const v = b.querySelector('video'); v.muted = true;
+  if (pos === 'p0') hv = v;
+  // centre first, the side phones a moment later so the first reel starts fast
+  const start = () => clipURL(id).then(u => { v.src = u; v.play().catch(() => {}); });
+  if (pos === 'p0') start();
+  else if (getComputedStyle(b).display !== 'none') setTimeout(start, pos.endsWith('1') ? 700 : 1500);
+});
+const tcEl = document.getElementById('tc');
 (function tick() {
-  const t = hv.currentTime || 0;
-  tcEl.textContent = `00:${pad(Math.floor(t / 60))}:${pad(Math.floor(t % 60))}:${pad(Math.floor((t % 1) * 24))}`;
+  const t = (hv && hv.currentTime) || 0;
+  if (tcEl) tcEl.textContent = `00:${pad(Math.floor(t / 60))}:${pad(Math.floor(t % 60))}:${pad(Math.floor((t % 1) * 24))}`;
   requestAnimationFrame(tick);
 })();
 </script>
